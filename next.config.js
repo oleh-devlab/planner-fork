@@ -8,6 +8,8 @@ await import("./src/env.js");
 const config = {
   reactStrictMode: true,
   output: 'export',
+  basePath: '/planner-fork',
+  trailingSlash: true,
   async headers() {
     return [
       {
@@ -37,6 +39,7 @@ const config = {
     ];
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
