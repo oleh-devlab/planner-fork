@@ -4,11 +4,10 @@ import React, {
   useContext,
   useMemo,
   useState,
-  ReactNode,
-  FC,
 } from "react";
+import type { ReactNode, FC } from "react";
 import { AppointmentService, ResourceService } from "../services";
-import { Appointment, Resource } from "../models";
+import type { Appointment, Resource } from "../models";
 
 interface DataContextType {
   appointments: Appointment[];

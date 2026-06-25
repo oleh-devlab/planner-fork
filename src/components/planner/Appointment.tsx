@@ -9,10 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import {
-  Appointment as AppointmentType,
-  updateAppointmentSchema,
-} from "@/models/Appointment";
+import type { Appointment as AppointmentType } from "@/models/Appointment";
+import { updateAppointmentSchema } from "@/models/Appointment";
 import { useData } from "@/contexts/PlannerDataContext";
 import { Button } from "../ui/button";
 import {

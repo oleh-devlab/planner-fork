@@ -283,6 +283,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
 
   useEffect(() => {
     checkPreset()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range])
 
   const PresetButton = ({
@@ -324,6 +325,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
       openedRangeRef.current = range
       openedRangeCompareRef.current = rangeCompare
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen])
 
   return (
@@ -477,7 +479,7 @@ export const DateRangePicker: FC<DateRangePickerProps> & {
                 </div>
               </div>
               { isSmallScreen && (
-                <Select defaultValue={selectedPreset} onValueChange={(value:any) => { setPreset(value) }}>
+                <Select defaultValue={selectedPreset} onValueChange={(value:string) => { setPreset(value) }}>
                   <SelectTrigger className="w-[180px] mx-auto mb-2">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>

@@ -10,10 +10,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import {
-  Appointment as AppointmentType,
-  createAppointmentSchema,
-} from "@/models/Appointment";
+import type { Appointment as AppointmentType } from "@/models/Appointment";
+import { createAppointmentSchema } from "@/models/Appointment";
 import { useData } from "@/contexts/PlannerDataContext";
 import { Button } from "../ui/button";
 import {

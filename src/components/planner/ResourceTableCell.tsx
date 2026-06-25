@@ -1,5 +1,5 @@
-import React, { FC } from "react";
-import { Resource } from "@/models";
+import type { FC } from "react";
+import type { Resource } from "@/models";
 import { cn } from "@/lib/utils";
 import { TableCell } from "../ui/table";
 
@@ -39,7 +39,8 @@ const ResourceTableCell: FC<ResourceTableCellProps> = ({
     >
       <div className="flex items-center space-x-4">
         <div className="relative h-10 w-10">
-          <img
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
             className="rounded-full object-fill"
             src={imageSrc || FALLBACK_AVATAR}
             alt={resourceItem.name}

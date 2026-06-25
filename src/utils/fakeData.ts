@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import { addDays, addHours, differenceInCalendarDays } from 'date-fns';
-import { Appointment, Resource, resourceType } from '@/models';
+import type { Appointment, Resource, resourceType } from '@/models';
 
 const RESOURCE_TYPES: resourceType[] = [
   'room',

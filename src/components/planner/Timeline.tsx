@@ -3,10 +3,9 @@ import { useCalendar } from "@/contexts/PlannerContext";
 import { cn } from "@/lib/utils";
 import { TableHead, TableHeader, TableRow } from "../ui/table";
 
-export const Timeline: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({
-  className,
-  ...props
-}) => {
+export const Timeline: React.FC<
+  React.HTMLAttributes<HTMLDivElement>
+> = () => {
   const {timeLabels} = useCalendar();
  
   return (

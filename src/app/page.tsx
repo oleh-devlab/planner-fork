@@ -1,7 +1,7 @@
 "use client";
 import { generateResources, generateAppointments } from "../utils/fakeData";
 import { useEffect, useState } from "react";
-import { Appointment, Resource } from "@/models";
+import type { Appointment, Resource } from "@/models";
 
 import Link from "next/link";
 import { CircleUser, Menu, Package2, Search } from "lucide-react";

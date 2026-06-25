@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
 import { startOfDay, endOfDay } from "date-fns";
-import { DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 import { getLabelsForView } from "@/lib/utils";
 
 export type ViewMode = "day" | "week" | "month" | "year";

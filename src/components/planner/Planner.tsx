@@ -1,7 +1,8 @@
-import React, { FC, useEffect } from "react";
+import React, { useEffect } from "react";
+import type { FC } from "react";
 import CalendarToolbar from "./PlannerToolbar";
 import Appointment from "./Appointment";
-import { Appointment as AppointmentType, Resource } from "@/models";
+import type { Appointment as AppointmentType, Resource } from "@/models";
 import {
   PlannerDataContextProvider,
   useData,
@@ -49,7 +50,7 @@ const PlannerMainComponent: FC<PlannerMainComponentProps> = ({ ...props }) => {
 };
 
 interface CalendarContentProps extends React.HTMLAttributes<HTMLDivElement> {}
-const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
+const CalendarContent: React.FC<CalendarContentProps> = () => {
   const { viewMode, dateRange, timeLabels } = useCalendar();
   const { resources, appointments, updateAppointment } = useData();
 

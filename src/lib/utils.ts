@@ -1,9 +1,10 @@
-import { type ClassValue, clsx } from "clsx"
+import type { ClassValue } from "clsx"
+import { clsx } from "clsx"
 import { eachDayOfInterval, eachHourOfInterval, eachMonthOfInterval, eachWeekOfInterval, endOfDay, endOfMonth, endOfYear, format, differenceInDays, getWeekOfMonth, isSameDay, isSameMonth, isSameWeek, isWithinInterval, startOfDay, startOfMonth, startOfYear } from "date-fns";
-import { DateRange } from "react-day-picker";
+import type { DateRange } from "react-day-picker";
 import { twMerge } from "tailwind-merge"
-import { Appointment } from "@/models/Appointment";
-import { ViewMode } from "@/contexts/PlannerContext";
+import type { Appointment } from "@/models/Appointment";
+import type { ViewMode } from "@/contexts/PlannerContext";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
