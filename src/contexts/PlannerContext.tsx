@@ -1,27 +1,21 @@
-import React, { createContext, useContext, useState, useMemo } from "react";
-import { startOfDay, endOfDay, startOfWeek } from "date-fns";
+import React, { createContext, useContext, useMemo, useState } from "react";
+import { startOfDay, endOfDay } from "date-fns";
 import { DateRange } from "react-day-picker";
 import { getLabelsForView } from "@/lib/utils";
 
+export type ViewMode = "day" | "week" | "month" | "year";
+
 interface PlannerContextType {
-  viewMode: "day" | "week" | "month" | "year";
+  viewMode: ViewMode;
   timeLabels: string[];
   dateRange: DateRange;
   currentDateRange: DateRange;
   setDateRange: (dateRange: DateRange) => void;
 }
 
-const defaultContextValue: PlannerContextType = {
-  viewMode: "week", // default starting view
-  timeLabels: [],
-  dateRange: { from: startOfWeek(new Date()), to: endOfDay(new Date()) },
-  currentDateRange: { from: startOfDay(new Date()), to: endOfDay(new Date()) },
-  setDateRange: (dateRange: DateRange) => {
-    console.log(dateRange);
-  },
-};
-
-const PlannerContext = createContext<PlannerContextType>(defaultContextValue);
+const PlannerContext = createContext<PlannerContextType | undefined>(
+  undefined,
+);
 
 export const PlannerProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -31,9 +25,11 @@ export const PlannerProvider: React.FC<{ children: React.ReactNode }> = ({
     to: endOfDay(new Date()),
   });
 
-  const viewMode = useMemo(() => {
+  const viewMode = useMemo<ViewMode>(() => {
+    if (!dateRange.from || !dateRange.to) return "week";
     const days =
-      (Number(dateRange.to) - Number(dateRange.from)) / (1000 * 3600 * 24);
+      (dateRange.to.getTime() - dateRange.from.getTime()) /
+      (1000 * 3600 * 24);
     if (days < 1) return "day";
     if (days <= 7) return "week";
     if (days <= 31) return "month";
@@ -47,21 +43,26 @@ export const PlannerProvider: React.FC<{ children: React.ReactNode }> = ({
     });
   }, [viewMode, dateRange]);
 
-  const value = {
-    timeLabels,
-    dateRange,
-    setDateRange,
-    viewMode: viewMode as "day" | "week" | "month" | "year",
-    currentDateRange: dateRange,
-  };
+  const value = useMemo<PlannerContextType>(
+    () => ({
+      viewMode,
+      timeLabels,
+      dateRange,
+      currentDateRange: dateRange,
+      setDateRange,
+    }),
+    [viewMode, timeLabels, dateRange],
+  );
 
   return (
-    <PlannerContext.Provider value={value}>
-      {children}
-    </PlannerContext.Provider>
+    <PlannerContext.Provider value={value}>{children}</PlannerContext.Provider>
   );
 };
 
 export const useCalendar = () => {
-  return useContext(PlannerContext);
+  const context = useContext(PlannerContext);
+  if (!context) {
+    throw new Error("useCalendar must be used within a PlannerProvider");
+  }
+  return context;
 };

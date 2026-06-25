@@ -30,7 +30,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -56,7 +55,8 @@ const Appointment: React.FC<AppointmentProps> = ({
   const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
-    const element = ref.current!;
+    const element = ref.current;
+    if (!element) return;
     return draggable({
       element,
       getInitialData: () => ({
@@ -67,21 +67,40 @@ const Appointment: React.FC<AppointmentProps> = ({
       onDragStart: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-  }, []);
+  }, [appointment.id, columnIndex, resourceId]);
 
   const form = useForm<z.infer<typeof updateAppointmentSchema>>({
     resolver: zodResolver(updateAppointmentSchema),
     defaultValues: {
       title: appointment.title,
-      start: new Date(appointment.start) ?? new Date(),
-      end: new Date(appointment.end) ?? new Date(),
+      start: new Date(appointment.start),
+      end: new Date(appointment.end),
     },
   });
 
+  // Keep the form in sync with the appointment after drag-and-drop moves it
+  // to a new slot (its start/end change) or after any other external update.
+  // `defaultValues` is only applied on mount, so without this the popover form
+  // would keep showing the old times after a drop.
+  useEffect(() => {
+    form.reset({
+      title: appointment.title,
+      start: new Date(appointment.start),
+      end: new Date(appointment.end),
+    });
+    // `form.reset` identity is stable; we intentionally re-sync on the
+    // appointment's mutable fields, not the form instance.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appointment.id, appointment.start, appointment.end, appointment.title]);
+
   function onSubmit(values: z.infer<typeof updateAppointmentSchema>) {
+    // `details` is optional in the edit form; never overwrite the existing
+    // payload with `undefined`, otherwise the card crashes on the next render
+    // when it reads `appointment.details.service`.
     updateAppointment({
       ...appointment,
       ...values,
+      details: values.details ?? appointment.details,
     });
   }
 
@@ -89,7 +108,7 @@ const Appointment: React.FC<AppointmentProps> = ({
     <Card ref={ref} className="hover:cursor-grab   ">
       <CardHeader className="flex flex-row items-center justify-between p-1">
         <Badge variant={"outline"} className="  truncate pl-2 text-xs">
-          {appointment.details.service}
+          {appointment.details?.service}
         </Badge>
         <Popover>
           <PopoverTrigger>

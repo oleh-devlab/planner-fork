@@ -1,11 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useCalendar } from "@/contexts/PlannerContext";
-import { Button } from "../ui/button";
 import { cn } from "@/lib/utils";
 import { DateRangePicker } from "../ui/date-range-picker";
 import { DateRange } from "react-day-picker";
 import { endOfDay, endOfWeek, startOfWeek } from "date-fns";
-import { useData } from "@/contexts/PlannerDataContext";
 import AddAppointmentDialog from "./AddAppointmentDialog";
 
 interface CalendarToolbarProps extends React.HTMLAttributes<HTMLDivElement> {}
@@ -15,13 +13,10 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   ...props
 }) => {
   const { setDateRange } = useCalendar();
-  const { addResource, addAppointment } = useData();
 
   const [range, setRange] = useState<DateRange>({
-    from: startOfWeek(new Date(), {
-      locale: { options: { weekStartsOn: 1 } },
-    }),
-    to: endOfWeek(new Date()),
+    from: startOfWeek(new Date(), { weekStartsOn: 1 }),
+    to: endOfWeek(new Date(), { weekStartsOn: 1 }),
   });
   const handleDateRangeUpdate = (range: DateRange) => {
     const from = range.from;
@@ -33,7 +28,7 @@ const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   };
   useEffect(() => {
     setDateRange(range);
-  }, [range]);
+  }, [range, setDateRange]);
 
   return (
     <div

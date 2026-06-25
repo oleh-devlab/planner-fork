@@ -53,6 +53,13 @@ const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
   const { viewMode, dateRange, timeLabels } = useCalendar();
   const { resources, appointments, updateAppointment } = useData();
 
+  const appointmentsRef = React.useRef(appointments);
+  const resourcesRef = React.useRef(resources);
+  useEffect(() => {
+    appointmentsRef.current = appointments;
+    resourcesRef.current = resources;
+  }, [appointments, resources]);
+
   useEffect(() => {
     return monitorForElements({
       onDrop({ source, location }) {
@@ -61,20 +68,20 @@ const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
 
         if (!destination || !sourceData) return;
 
-        const appointment = appointments.find(
+        const appointment = appointmentsRef.current.find(
           (appt) => appt.id === sourceData.appointmentId,
         );
         if (!appointment) return;
 
-        const newResource = resources.find(
+        const newResource = resourcesRef.current.find(
           (res) => res.id === destination.resourceId,
         );
         if (!newResource) return;
 
         const newDates = calculateNewDates(
           viewMode,
-          destination.columnIndex as unknown as number,
-          sourceData.columnIndex as unknown as number,
+          Number(destination.columnIndex),
+          Number(sourceData.columnIndex),
           {
             from: appointment.start,
             to: appointment.end,
@@ -89,7 +96,32 @@ const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
         });
       },
     });
-  }, [appointments]);
+  }, [viewMode, updateAppointment]);
+
+  const groupedAppointments = React.useMemo(() => {
+    const map = new Map<string, Map<number, AppointmentType[]>>();
+    for (const appt of appointments) {
+      if (!map.has(appt.resourceId)) {
+        map.set(appt.resourceId, new Map());
+      }
+      const resMap = map.get(appt.resourceId)!;
+      for (let i = 0; i < (timeLabels?.length || 0); i++) {
+        if (filterAppointments(appt, i, dateRange, viewMode)) {
+          if (!resMap.has(i)) {
+            resMap.set(i, []);
+          }
+          resMap.get(i)!.push(appt);
+        }
+      }
+    }
+    
+    for (const resMap of map.values()) {
+      for (const list of resMap.values()) {
+        list.sort((a, b) => a.start.getTime() - b.start.getTime());
+      }
+    }
+    return map;
+  }, [appointments, timeLabels, dateRange, viewMode]);
 
   return (
     <div className="flex max-h-[calc(80vh_-_theme(spacing.16))] flex-col  ">
@@ -100,24 +132,15 @@ const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
             {resources.map((resource) => (
               <TableRow key={resource.id}>
                 <ResourceTableCell resourceItem={resource} />
-                {timeLabels?.map((label, index) => (
-                  <DropTableCell
-                    resourceId={resource.id}
-                    columnIndex={index}
-                    key={index}
-                  >
-                    {appointments
-                      .filter(
-                        (appt) =>
-                          filterAppointments(
-                            appt,
-                            index,
-                            dateRange,
-                            viewMode,
-                          ) && appt.resourceId === resource.id,
-                      )
-                      .sort((a, b) => a.start.getTime() - b.start.getTime())
-                      .map((appt) => (
+                {timeLabels?.map((label, index) => {
+                  const cellAppointments = groupedAppointments.get(resource.id)?.get(index) || [];
+                  return (
+                    <DropTableCell
+                      resourceId={resource.id}
+                      columnIndex={index}
+                      key={index}
+                    >
+                      {cellAppointments.map((appt) => (
                         <Appointment
                           appointment={appt}
                           columnIndex={index}
@@ -125,8 +148,9 @@ const CalendarContent: React.FC<CalendarContentProps> = ({ ...props }) => {
                           key={appt.id}
                         />
                       ))}
-                  </DropTableCell>
-                ))}
+                    </DropTableCell>
+                  );
+                })}
               </TableRow>
             ))}
           </TableBody>

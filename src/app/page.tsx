@@ -24,8 +24,8 @@ export default function HomePage() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
 
   useEffect(() => {
-    const initResources = generateResources(4); // Generate 10 resources
-    const initAppointments = generateAppointments(100, initResources); // Generate 20 appointments linked to the resources
+    const initResources = generateResources(4); // Generate 4 resources
+    const initAppointments = generateAppointments(100, initResources); // Generate 100 appointments linked to the resources
     setResources(initResources);
     setAppointments(initAppointments);
   }, []);
@@ -38,37 +38,13 @@ export default function HomePage() {
             className="flex items-center gap-2 text-lg font-semibold md:text-base"
           >
             <Package2 className="h-6 w-6" />
-            <span className="sr-only">Acme Inc</span>
+            <span className="sr-only">Planner</span>
           </Link>
           <Link
             href="#"
             className="text-foreground transition-colors hover:text-foreground"
           >
             Dashboard
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Orders
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Products
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Customers
-          </Link>
-          <Link
-            href="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
-          >
-            Analytics
           </Link>
         </nav>
         <Sheet>
@@ -89,34 +65,10 @@ export default function HomePage() {
                 className="flex items-center gap-2 text-lg font-semibold"
               >
                 <Package2 className="h-6 w-6" />
-                <span className="sr-only">Acme Inc</span>
+                <span className="sr-only">Planner</span>
               </Link>
               <Link href="#" className="hover:text-foreground">
                 Dashboard
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Orders
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Products
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Customers
-              </Link>
-              <Link
-                href="#"
-                className="text-muted-foreground hover:text-foreground"
-              >
-                Analytics
               </Link>
             </nav>
           </SheetContent>
@@ -127,7 +79,7 @@ export default function HomePage() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder="Search appointments..."
                 className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
               />
             </div>
@@ -151,14 +103,7 @@ export default function HomePage() {
           </DropdownMenu>
         </div>
       </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        {appointments.length > 0 && (
-          <Planner
-            initialResources={resources}
-            initialAppointments={appointments}
-          />
-        )}
-      </main>
+      </div>
     </div>
   );
 }

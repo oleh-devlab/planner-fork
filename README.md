@@ -30,7 +30,7 @@ Planner is a highly adaptable scheduling component tailored for React applicatio
 |-- /lib
 |   └── utils.ts                      # Additional utility functions
 |-- /contexts
-|   ├── CalendarDataContext.tsx       # Context for managing Planner data
+|   ├── PlannerDataContext.tsx        # Context for managing Planner data
 |   └── PlannerContext.tsx            # Context for managing overall app state
 |-- /components
 |   ├── ui                            # UI components following `shadcn/ui` philosophy

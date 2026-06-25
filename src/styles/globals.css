@@ -81,14 +81,14 @@
 
   /* Handle */
   .calendar-scroll::-webkit-scrollbar-thumb {
-    background: #DADCE0;
+    background: hsl(var(--border));
     border-radius: 6px;
     cursor: grab;
   }
 
   /* Handle on hover */
   .calendar-scroll::-webkit-scrollbar-thumb:hover {
-    background: #BDC1C6;
+    background: hsl(var(--muted-foreground));
   }
 
   /* Handle on active */

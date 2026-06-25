@@ -1,11 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useTransition } from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,9 +18,7 @@ import { useData } from "@/contexts/PlannerDataContext";
 import { Button } from "../ui/button";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -32,7 +29,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "../ui/input";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TimePicker } from "../ui/time-picker";
 import { Calendar } from "../ui/calendar";
 import { CalendarIcon } from "lucide-react";
@@ -45,11 +42,24 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
+type AppointmentFormValues = z.infer<typeof createAppointmentSchema>;
+
+/**
+ * Generates a reasonably unique id, falling back to a manual implementation
+ * when `crypto.randomUUID` is unavailable (e.g. in non-secure contexts).
+ */
+function generateId(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+    return crypto.randomUUID();
+  }
+  return "appt-" + Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
 const AddAppointmentDialog: React.FC = () => {
   const { addAppointment, resources } = useData();
   const [isOpened, setIsOpened] = useState(false);
-  const [isPending, startAddAppointmentTransition] = useTransition();
-  const form = useForm<AppointmentType>({
+
+  const form = useForm<AppointmentFormValues>({
     resolver: zodResolver(createAppointmentSchema),
     defaultValues: {
       title: "",
@@ -58,38 +68,24 @@ const AddAppointmentDialog: React.FC = () => {
       resourceId: "",
     },
   });
-  function onSubmit(values: z.infer<typeof createAppointmentSchema>) {
-    const id = crypto.randomUUID();
+
+  function onSubmit(values: AppointmentFormValues) {
     const newAppointment: AppointmentType = {
-      details: {
-        service: "Music",
-      },
-      order: 0,
-      id: id,
+      id: generateId(),
       title: values.title,
       start: values.start,
       end: values.end,
       resourceId: values.resourceId,
+      order: values.order ?? 0,
+      details: values.details ?? { service: "Music" },
     };
 
-    startAddAppointmentTransition(() => {
-      toast.promise(
-        () =>
-          new Promise((resolve) => {
-            resolve(addAppointment(newAppointment));
-          }),
-        {
-          loading: "Adding appointment",
-          success: "Appointment added",
-          error: "Failed to add appointment",
-        },
-      );
-      form.reset();
-    });
-    setTimeout(() => {
-      setIsOpened(false);
-    }, 1000);
+    addAppointment(newAppointment);
+    toast.success("Appointment added");
+    form.reset();
+    setIsOpened(false);
   }
+
   return (
     <Dialog open={isOpened} onOpenChange={setIsOpened}>
       <DialogTrigger asChild>
@@ -139,7 +135,6 @@ const AddAppointmentDialog: React.FC = () => {
                         </Button>
                       </PopoverTrigger>
                     </FormControl>
-                    <FormMessage />
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
@@ -237,7 +232,9 @@ const AddAppointmentDialog: React.FC = () => {
             />
 
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button type="submit">
+                Save changes
+              </Button>
             </DialogFooter>
           </form>
         </Form>

@@ -4,13 +4,12 @@ export class AppointmentService {
     private appointments: Appointment[];
 
     constructor(initialAppointments: Appointment[]) {
-        this.appointments = initialAppointments;
+        this.appointments = [...initialAppointments];
     }
 
     createAppointment(appointment: Appointment) {
-        debugger
         this.appointments.push(appointment);
-        return this.appointments;
+        return this.getAppointments();
     }
 
     updateAppointment(updatedAppointment: Appointment) {
@@ -18,12 +17,12 @@ export class AppointmentService {
         if (index !== -1) {
             this.appointments[index] = { ...this.appointments[index], ...updatedAppointment };
         }
-        return this.appointments;
+        return this.getAppointments();
     }
 
     deleteAppointment(id: string) {
         this.appointments = this.appointments.filter(a => a.id !== id);
-        return this.appointments;
+        return this.getAppointments();
     }
 
     getAppointments() {

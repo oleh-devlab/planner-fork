@@ -1,7 +1,6 @@
 import { FC, useEffect, useRef, useState } from "react";
 import { TableCell } from "../ui/table";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { Resource } from "@/models";
 import { cn } from "@/lib/utils";
 
 interface DropTableCellProps
@@ -21,7 +20,8 @@ const DropTableCell: FC<DropTableCellProps> = ({
   const ref = useRef<HTMLTableCellElement>(null);
   const [isOver, setIsOver] = useState(false);
   useEffect(() => {
-    const element = ref.current!;
+    const element = ref.current;
+    if (!element) return;
 
     return dropTargetForElements({
       element,
@@ -34,11 +34,7 @@ const DropTableCell: FC<DropTableCellProps> = ({
         setIsOver(false);
       },
     });
-  }, []);
-  const style = {
-    backgroundColor: isOver ? "#f0f0f0" : "#fff",
-    border: "1px solid #ddd",
-  };
+  }, [resourceId, columnIndex]);
   return (
     <TableCell className={cn("border bg-background", isOver ? "bg-primary-foreground" : "bg-background"  )} ref={ref} {...props}>
       <div className="grid grid-flow-row grid-cols-2 gap-2">{children}</div>

@@ -3,12 +3,13 @@ import { eachDayOfInterval, eachHourOfInterval, eachMonthOfInterval, eachWeekOfI
 import { DateRange } from "react-day-picker";
 import { twMerge } from "tailwind-merge"
 import { Appointment } from "@/models/Appointment";
+import { ViewMode } from "@/contexts/PlannerContext";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export const calculateNewDates = (viewMode: string, index: number, currentIndex: number, dateRange: DateRange) => {
+export const calculateNewDates = (viewMode: ViewMode, index: number, currentIndex: number, dateRange: DateRange) => {
   let start = new Date(dateRange.from as Date);
   let end = new Date(dateRange.to as Date);
   const delta = (currentIndex - index) * -1;
@@ -40,7 +41,7 @@ export const filterAppointments = (
   appt: Appointment,
   index: number,
   dateRange: DateRange,
-  viewMode: string,
+  viewMode: ViewMode,
 ): boolean => {
   const apptDate = new Date(appt.start);
   if (
@@ -56,7 +57,7 @@ export const filterAppointments = (
 const isAppointmentInSlot = (
   apptDate: Date,
   index: number,
-  viewMode: string,
+  viewMode: ViewMode,
   dateRange: DateRange,
 ): boolean => {
   if (!dateRange.from) return false;
@@ -67,13 +68,18 @@ const isAppointmentInSlot = (
         apptDate.getHours() === index && isSameDay(apptDate, dateRange.from)
       );
     case "week":
+      // Labels are produced by `eachDayOfInterval(from → to)` (week starts on
+      // Monday), so the column index is simply the number of days from the
+      // range start. The previous logic used `getDay()` (Sunday-based) which
+      // placed appointments in the wrong column.
       return (
-        apptDate.getDay() - (6 - differenceInDays(new Date(dateRange.to!), new Date(dateRange.from))) === index &&
-        isSameWeek(apptDate, dateRange.from)
+        differenceInDays(apptDate, dateRange.from) === index &&
+        isSameWeek(apptDate, dateRange.from, { weekStartsOn: 1 })
       );
     case "month":
+      // `getWeekOfMonth` is 1-indexed, slots are 0-indexed.
       return (
-        getWeekOfMonth(apptDate) === index &&
+        getWeekOfMonth(apptDate) - 1 === index &&
         isSameMonth(apptDate, dateRange.from)
       );
     case "year":
@@ -83,7 +89,7 @@ const isAppointmentInSlot = (
   }
 };
 
-export const getLabelsForView = (viewMode: 'day' | 'week' | 'month' | 'year', dateRange: { start: Date; end: Date }): string[] => {
+export const getLabelsForView = (viewMode: ViewMode, dateRange: { start: Date; end: Date }): string[] => {
   switch (viewMode) {
     case 'day':
       // Generate hourly labels for each day in the range

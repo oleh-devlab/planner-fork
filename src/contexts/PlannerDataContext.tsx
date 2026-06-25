@@ -1,4 +1,12 @@
-import React, { createContext, useContext, useState, ReactNode, FC } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  ReactNode,
+  FC,
+} from "react";
 import { AppointmentService, ResourceService } from "../services";
 import { Appointment, Resource } from "../models";
 
@@ -20,47 +28,90 @@ export const PlannerDataContextProvider: FC<{
   initialAppointments: Appointment[];
   initialResources: Resource[];
 }> = ({ children, initialAppointments, initialResources }) => {
-  const appointmentService = useState(new AppointmentService(initialAppointments))[0];
-  const resourceService = useState(new ResourceService(initialResources))[0];
+  // The services act as the single source of truth for the data, while a
+  // version counter forces consumers to re-render whenever the data mutates.
+  // Using a monotonically increasing counter (instead of toggling a boolean)
+  // avoids the race where two updates in the same batch cancel each other out
+  // and no re-render is triggered.
+  const [appointmentService] = useState(
+    () => new AppointmentService(initialAppointments),
+  );
+  const [resourceService] = useState(
+    () => new ResourceService(initialResources),
+  );
+  const [version, setVersion] = useState(0);
 
-  // Create a state that will re-render the context when updated
-  const [trigger, setTrigger] = useState(false);
+  const bump = useCallback(() => setVersion((v) => v + 1), []);
 
-  const handleUpdate = () => setTrigger(!trigger); // simple state toggle to trigger re-render
-
-  const contextValue: DataContextType = {
-    appointments: appointmentService.getAppointments(),
-    resources: resourceService.getResources(),
-    addAppointment: (appointment) => {
+  const addAppointment = useCallback(
+    (appointment: Appointment) => {
       appointmentService.createAppointment(appointment);
-      handleUpdate();
+      bump();
     },
-    updateAppointment: (appointment) => {
+    [appointmentService, bump],
+  );
+  const updateAppointment = useCallback(
+    (appointment: Appointment) => {
       appointmentService.updateAppointment(appointment);
-      handleUpdate();
+      bump();
     },
-    removeAppointment: (id) => {
+    [appointmentService, bump],
+  );
+  const removeAppointment = useCallback(
+    (id: string) => {
       appointmentService.deleteAppointment(id);
-      handleUpdate();
+      bump();
     },
-    addResource: (resource) => {
+    [appointmentService, bump],
+  );
+  const addResource = useCallback(
+    (resource: Resource) => {
       resourceService.addResource(resource);
-      handleUpdate();
+      bump();
     },
-    updateResource: (resource) => {
+    [resourceService, bump],
+  );
+  const updateResource = useCallback(
+    (resource: Resource) => {
       resourceService.updateResource(resource);
-      handleUpdate();
+      bump();
     },
-    removeResource: (id) => {
+    [resourceService, bump],
+  );
+  const removeResource = useCallback(
+    (id: string) => {
       resourceService.removeResource(id);
-      handleUpdate();
-    }
-  };
+      bump();
+    },
+    [resourceService, bump],
+  );
+
+  // `version` is read here only to recompute the snapshots when data changes.
+  const contextValue = useMemo<DataContextType>(
+    () => ({
+      appointments: appointmentService.getAppointments(),
+      resources: resourceService.getResources(),
+      addAppointment,
+      updateAppointment,
+      removeAppointment,
+      addResource,
+      updateResource,
+      removeResource,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      version,
+      addAppointment,
+      updateAppointment,
+      removeAppointment,
+      addResource,
+      updateResource,
+      removeResource,
+    ],
+  );
 
   return (
-    <DataContext.Provider value={contextValue}>
-      {children}
-    </DataContext.Provider>
+    <DataContext.Provider value={contextValue}>{children}</DataContext.Provider>
   );
 };
 
